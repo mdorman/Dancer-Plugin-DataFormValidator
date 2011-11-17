@@ -1,0 +1,23 @@
+Source: dancer-plugin-dataformvalidator
+Section: perl
+Priority: optional
+Maintainer: Michael Alan Dorman <mdorman@ironicdesign.com>
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: libdancer-perl,
+ libdata-dump-perl,
+ libdata-formvalidator-perl,
+ perl
+Standards-Version: 3.9.2
+Homepage: http://search.cpan.org/dist/Dancer-Plugin-DataFormValidator/
+
+Package: libdancer-plugin-dataformvalidator-perl
+Architecture: all
+Depends: ${misc:Depends}, ${perl:Depends},
+ libdancer-perl,
+ libdata-dump-perl,
+ libdata-formvalidator-perl,
+ perl
+Description: Easy access to Data::FormValidator from within Dancer applications
+ Provides an easy way to validate user input based on an input profile
+ (specified as per Data::FormValidator) using a dfv() keyword within your
+ Dancer application.
