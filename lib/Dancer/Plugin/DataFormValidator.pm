@@ -1,4 +1,7 @@
 package Dancer::Plugin::DataFormValidator;
+{
+  $Dancer::Plugin::DataFormValidator::VERSION = '0.002';
+}
 # ABSTRACT: Easy access to Data::FormValidator from within Dancer applications
 
 use strict;
@@ -8,7 +11,54 @@ use Dancer ':syntax';
 use Dancer::Plugin;
 use Data::FormValidator;
 
-=encoding utf8
+
+register dfv => sub {
+    my ($profile, $input) = @_;
+
+    debug 'Checking for explicit input';
+    unless ($input) {
+        debug 'Getting params implicitly';
+        $input = params;
+    }
+
+    debug "input is " . pp $input;
+
+    debug 'Checking for explicit profile';
+    if (ref $profile) {
+        debug 'Checking using explicit profile';
+        return Data::FormValidator->check ($input, $profile);
+    }
+    elsif ($profile) {
+        debug 'Looking for cached Data::FormValidator object';
+        my $dfv = config->{validator}->{_dfv};
+        unless ($dfv) {
+            debug 'Creating Data;:FormValidator object for the first time';
+            config->{validator}->{_dfv} = $dfv = Data::FormValidator->new (join '/', setting ('appdir'), plugin_setting->{profile_file});
+        }
+        debug 'Creating Data;:FormValidator object for the first time';
+        debug 'Checking using named profile';
+        return $dfv->check ($input, $profile);
+    } else {
+        error 'No profile specified for doing validation';
+    }
+
+    return 0;
+};
+
+register_plugin;
+
+1;
+
+__END__
+=pod
+
+=head1 NAME
+
+Dancer::Plugin::DataFormValidator - Easy access to Data::FormValidator from within Dancer applications
+
+=head1 VERSION
+
+version 0.002
 
 =head1 SYNOPSIS
 
@@ -80,6 +130,8 @@ however you please.
         }
     };
 
+=encoding utf8
+
 =head1 CONTRIBUTING
 
 This module is developed on Github at:
@@ -99,41 +151,16 @@ L<Dancer::Plugin::FormValidator> by Natal Ngétal, C<<
 L<Dancer>
 L<Data::FormValidator>
 
+=head1 AUTHOR
+
+Michael Alan Dorman <mdorman@ironicdesign.com>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2011 by Ironic Design, Inc..
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
 =cut
 
-register dfv => sub {
-    my ($profile, $input) = @_;
-
-    debug 'Checking for explicit input';
-    unless ($input) {
-        debug 'Getting params implicitly';
-        $input = params;
-    }
-
-    debug "input is " . pp $input;
-
-    debug 'Checking for explicit profile';
-    if (ref $profile) {
-        debug 'Checking using explicit profile';
-        return Data::FormValidator->check ($input, $profile);
-    }
-    elsif ($profile) {
-        debug 'Looking for cached Data::FormValidator object';
-        my $dfv = config->{validator}->{_dfv};
-        unless ($dfv) {
-            debug 'Creating Data;:FormValidator object for the first time';
-            config->{validator}->{_dfv} = $dfv = Data::FormValidator->new (join '/', setting ('appdir'), plugin_setting->{profile_file});
-        }
-        debug 'Creating Data;:FormValidator object for the first time';
-        debug 'Checking using named profile';
-        return $dfv->check ($input, $profile);
-    } else {
-        error 'No profile specified for doing validation';
-    }
-
-    return 0;
-};
-
-register_plugin;
-
-1;
